@@ -14,11 +14,20 @@ class TodoController extends Controller
 
         if ($type === 'show_all') {
             $todo_all = Todo::all();
-        } else {
+        } elseif($type === 'normal') {
             $todo_all = Todo::where('status', 0)->get();
-        }
-       // $todo_all = Todo::where('status','0');        
-        return view('welcome', compact('todo_all'));
+        }else{
+            $todo_all = Todo::where('status', 0)->get();
+		}
+		if ($request->ajax()) {
+			// Return the data as JSON for AJAX requests
+			return response()->json($todo_all);
+		} else {
+			// Return the view for regular requests
+			// $todo_all = Todo::where('status','0');        
+			return view('welcome', compact('todo_all','type'));
+			//return view('welcome', compact('todo_all'));
+		}
     }
     
     function add(Request $request){
@@ -27,12 +36,11 @@ class TodoController extends Controller
 		$validator 					    =	Validator::make(
 			$request->all(),
 			 array(
-			 	'name'				=> 'required',
+			 	'name'				=> 'required|unique:list',
 			 ),
 			 array(
 			 	"name.required"			=>	trans("The  name field is required."),
-			 	
-
+			 	"name.unique"			=>	trans("The  name field is unique.")
 			 )
 		);
 
